@@ -1,0 +1,169 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+model House {
+  id        String     @id @default(uuid())
+  name      String     @unique
+  type      String?
+  status    String     @default("Vacant")
+
+  residents Resident[]
+
+  createdAt DateTime   @default(now())
+}
+
+model Resident {
+  id            String             @id @default(uuid())
+  name          String
+  email         String             @unique
+  debtorNumber  String?
+  address       String?
+  billingAddress String?
+  houseId       String
+  house         House              @relation(fields: [houseId], references: [id])
+
+  startDate     DateTime
+  creditBalance Float              @default(0)
+
+  reminderLevel Int                @default(0)
+  lastReminderDate DateTime?
+
+  reminders     Reminder[]
+  chargeDefs    ChargeDefinition[]
+  charges       Charge[]
+  payments      Payment[]
+  aliases       Alias[]
+  notes         Note[]
+  createdAt     DateTime           @default(now())
+}
+
+model Note {
+  id         String   @id @default(uuid())
+  text       String   @db.Text
+  author     String   @default("Admin")
+  residentId String
+  resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model ChargeDefinition {
+  id         String   @id @default(uuid())
+  residentId String
+  resident   Resident @relation(fields: [residentId], references: [id])
+
+  type       String
+  amount     Float
+  startDate  DateTime
+
+  createdAt  DateTime @default(now())
+}
+
+model Charge {
+  id         String              @id @default(uuid())
+  residentId String
+  resident   Resident            @relation(fields: [residentId], references: [id])
+
+  type       String
+  amount     Float
+  month      String
+  date       DateTime?           @default(now())
+  description String?
+
+  status     String              @default("UNPAID")
+  paidAmount Float               @default(0)
+
+  allocations PaymentAllocation[]
+
+  createdAt  DateTime            @default(now())
+
+}
+
+model Payment {
+  id         String              @id @default(uuid())
+  residentId String
+  resident   Resident            @relation(fields: [residentId], references: [id])
+
+  amount     Float
+  date       DateTime
+  method     String
+  note       String?
+
+  allocations PaymentAllocation[]
+
+  createdAt  DateTime            @default(now())
+}
+
+model PaymentAllocation {
+  id        String   @id @default(uuid())
+
+  paymentId String
+  payment   Payment  @relation(fields: [paymentId], references: [id])
+
+  chargeId  String
+  charge    Charge   @relation(fields: [chargeId], references: [id])
+
+  amount    Float
+
+  createdAt DateTime @default(now())
+}
+
+model BankTransaction {
+  id          String   @id @default(uuid())
+
+  description String
+  amount      Float
+  date        DateTime
+  reference   String?
+
+  status      String   @default("UNMATCHED")
+  paymentId   String?  @unique
+
+  createdAt   DateTime @default(now())
+}
+
+model Alias {
+  id          String   @id @default(uuid())
+  description String   @unique
+  residentId  String
+  resident    Resident @relation(fields: [residentId], references: [id])
+
+  createdAt   DateTime @default(now())
+}
+
+model Reminder {
+  id         String   @id @default(uuid())
+  resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
+  residentId String
+
+  type       String?  @default("Manual")
+  date       DateTime @default(now())
+  status     String?  @default("SENT")
+
+  createdAt  DateTime @default(now())
+}
+
+model SystemConfig {
+  id    String @id @default(uuid())
+  key   String @unique
+  value String @db.LongText
+
+  updatedAt DateTime @updatedAt
+}
+
+model Integration {
+  id          String   @id @default(uuid())
+  name        String   @unique
+  description String?
+  status      String   @default("DISCONNECTED")
+  connected   Boolean  @default(false)
+  icon        String?
+
+  updatedAt   DateTime @updatedAt
+}

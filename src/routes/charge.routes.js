@@ -1,0 +1,10 @@
+import { Router } from 'express';
+import * as chargeController from '../controllers/charge.controller.js';
+const router = Router();
+router.get('/', chargeController.getResidentCharges);
+router.post('/', chargeController.createCharge);
+router.post('/definitions', chargeController.addChargeDefinition);
+router.get('/definitions', chargeController.getChargeDefinitions);
+router.delete('/definitions/:id', chargeController.deleteChargeDefinition);
+router.post('/generate/:residentId', chargeController.generateMonthlyCharges);
+export default router;
