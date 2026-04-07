@@ -9,6 +9,7 @@
   "scripts": {
     "dev": "node --watch src/server.js",
     "start": "node src/server.js",
+    "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
@@ -21,9 +22,8 @@
     "dotenv": "^17.4.0",
     "express": "^5.2.1",
     "mysql2": "^3.20.0",
-    "node-cron": "^4.2.1"
-  },
-  "devDependencies": {
+    "node-cron": "^4.2.1",
     "prisma": "^6.19.3"
-  }
+  },
+  "devDependencies": {}
 }
