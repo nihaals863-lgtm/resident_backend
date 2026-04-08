@@ -55,4 +55,17 @@ export const seedSystemConfig = async () => {
       ]
     });
   }
+
+  // Seed Admin User
+  const userCount = await prisma.user.count();
+  if (userCount === 0) {
+    await prisma.user.create({
+      data: {
+        name: 'Admin',
+        email: 'admin@residence.com',
+        password: 'password123',
+        avatar: null
+      }
+    });
+  }
 };

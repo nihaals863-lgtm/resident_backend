@@ -16,8 +16,6 @@ model House {
   residents Resident[]
 
   createdAt DateTime   @default(now())
-
-@@map("house")
 }
 
 model Resident {
@@ -43,8 +41,6 @@ model Resident {
   aliases       Alias[]
   notes         Note[]
   createdAt     DateTime           @default(now())
-
-@@map("resident")
 }
 
 model Note {
@@ -55,8 +51,6 @@ model Note {
   resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
-
-@@map("note")
 }
 
 model ChargeDefinition {
@@ -69,7 +63,6 @@ model ChargeDefinition {
   startDate  DateTime
 
   createdAt  DateTime @default(now())
-@@map("chargedefinition")
 }
 
 model Charge {
@@ -89,7 +82,7 @@ model Charge {
   allocations PaymentAllocation[]
 
   createdAt  DateTime            @default(now())
-@@map("charge")
+
 }
 
 model Payment {
@@ -105,9 +98,6 @@ model Payment {
   allocations PaymentAllocation[]
 
   createdAt  DateTime            @default(now())
-
-@@map("payment")
-
 }
 
 model PaymentAllocation {
@@ -122,8 +112,6 @@ model PaymentAllocation {
   amount    Float
 
   createdAt DateTime @default(now())
-
-@@map("paymentallocation")
 }
 
 model BankTransaction {
@@ -138,8 +126,6 @@ model BankTransaction {
   paymentId   String?  @unique
 
   createdAt   DateTime @default(now())
-
-@@map("banktransaction")
 }
 
 model Alias {
@@ -149,9 +135,6 @@ model Alias {
   resident    Resident @relation(fields: [residentId], references: [id])
 
   createdAt   DateTime @default(now())
-
-
-@@map("alias")
 }
 
 model Reminder {
@@ -164,8 +147,6 @@ model Reminder {
   status     String?  @default("SENT")
 
   createdAt  DateTime @default(now())
-
-@@map("reminder")
 }
 
 model SystemConfig {
@@ -174,9 +155,8 @@ model SystemConfig {
   value String @db.LongText
 
   updatedAt DateTime @updatedAt
-
-@@map("systemconfig")
 }
+
 
 model Integration {
   id          String   @id @default(uuid())
@@ -187,6 +167,15 @@ model Integration {
   icon        String?
 
   updatedAt   DateTime @updatedAt
+}
 
-@@map("integration")
+model User {
+  id        String   @id @default(uuid())
+  name      String
+  email     String   @unique
+  password  String
+  avatar    String?  @db.LongText
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 }

@@ -9,8 +9,16 @@ import paymentRoutes from './routes/payment.routes.js';
 import bankRoutes from './routes/bank.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import reportsRoutes from './routes/reports.routes.js';
+import { seedSystemConfig } from './services/settings.service.js';
 
 const PORT = process.env.PORT || 5000;
+
+// Automate initial seeding
+seedSystemConfig().then(() => {
+  console.log('Database seeding checked/completed.');
+}).catch(err => {
+  console.error('Seeding error:', err);
+});
 
 app.use('/api/residents', residentRoutes);
 app.use('/api/charges', chargeRoutes);

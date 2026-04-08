@@ -6,7 +6,7 @@ import * as settingsService from '../services/settings.service.js';
 export const getAllResidents = async (req, res) => {
   try {
     const residents = await prisma.resident.findMany({
-      include: { 
+      include: {
         house: true,
         chargeDefs: true,
         charges: true,
@@ -25,7 +25,7 @@ export const getAllResidents = async (req, res) => {
 export const createResident = async (req, res) => {
   try {
     const { name, email, debtorNumber, address, billingAddress, houseId, startDate, creditBalance, monthlyCharge } = req.body;
-    
+
     // Create resident and potentially initial charge definition in a transaction
     const resident = await prisma.$transaction(async (tx) => {
       const newResident = await tx.resident.create({
@@ -75,7 +75,7 @@ export const createResident = async (req, res) => {
     // Fetch the full resident data to return
     const fullData = await prisma.resident.findUnique({
       where: { id: resident.id },
-      include: { 
+      include: {
         house: true,
         chargeDefs: true,
         charges: true,
@@ -99,7 +99,7 @@ export const getResidentById = async (req, res) => {
     const { id } = req.params;
     const resident = await prisma.resident.findUnique({
       where: { id },
-      include: { 
+      include: {
         house: true,
         chargeDefs: true,
         charges: true,
@@ -118,7 +118,7 @@ export const updateResident = async (req, res) => {
   try {
     const { id } = req.params;
     const { name, email, debtorNumber, address, billingAddress, houseId, startDate, creditBalance, charges } = req.body;
-    
+
     const resident = await prisma.$transaction(async (tx) => {
       // 1. Update basic info
       const updated = await tx.resident.update({
@@ -139,7 +139,7 @@ export const updateResident = async (req, res) => {
       if (charges && Array.isArray(charges)) {
         // Delete existing and re-create for simplicity in syncing the breakdown list
         await tx.chargeDefinition.deleteMany({ where: { residentId: id } });
-        
+
         const validCharges = charges.filter(c => c.type && parseFloat(c.amount) > 0);
         if (validCharges.length > 0) {
           await tx.chargeDefinition.createMany({
@@ -152,13 +152,13 @@ export const updateResident = async (req, res) => {
           });
         }
       }
-      
+
       return updated;
     });
 
     const fullData = await prisma.resident.findUnique({
       where: { id },
-      include: { 
+      include: {
         house: true,
         chargeDefs: true,
         charges: true,
@@ -177,36 +177,38 @@ export const updateResident = async (req, res) => {
 export const deleteResident = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // Use transaction to ensure safe deletion of dependent data
     await prisma.$transaction(async (tx) => {
       // 1. Delete payment allocations
       await tx.paymentAllocation.deleteMany({
-        where: { OR: [
-          { payment: { residentId: id } },
-          { charge: { residentId: id } }
-        ]}
+        where: {
+          OR: [
+            { payment: { residentId: id } },
+            { charge: { residentId: id } }
+          ]
+        }
       });
-      
+
       // 2. Delete payments
       await tx.payment.deleteMany({ where: { residentId: id } });
-      
+
       // 3. Delete charges
       await tx.charge.deleteMany({ where: { residentId: id } });
-      
+
       // 4. Delete charge definitions
       await tx.chargeDefinition.deleteMany({ where: { residentId: id } });
-      
+
       // 5. Delete aliases
       await tx.alias.deleteMany({ where: { residentId: id } });
 
       // 6. Delete reminders
       await tx.reminder.deleteMany({ where: { residentId: id } });
-      
+
       // 7. Finally delete the resident
       await tx.resident.delete({ where: { id } });
     });
-    
+
     res.json({ success: true, message: 'Resident and all associated data deleted successfully' });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
@@ -216,33 +218,33 @@ export const deleteResident = async (req, res) => {
 export const getResidentLedger = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // 1. Generate monthly charges first (auto-sync)
     await chargeService.generateMonthlyCharges(id);
-    
+
     // 2. Fetch charges and payments
     const charges = await prisma.charge.findMany({
       where: { residentId: id },
       orderBy: { month: 'desc' }
     });
-    
+
     const payments = await prisma.payment.findMany({
       where: { residentId: id },
       orderBy: { date: 'desc' }
     });
-    
+
     const resident = await prisma.resident.findUnique({
       where: { id },
       include: { reminders: true }
     });
-    
+
     // 3. Calculate summary
     const totalCharged = charges.reduce((sum, c) => sum + c.amount, 0);
     const totalPaid = payments.reduce((sum, p) => sum + p.amount, 0);
-    
+
     const outstanding = charges.reduce((sum, c) => sum + (c.amount - c.paidAmount), 0);
     const credit = resident.creditBalance || 0;
-    
+
     // 4. Derive Status
     let status = 'PAID';
     if (charges.length === 0) {
@@ -274,7 +276,7 @@ export const getResidentLedger = async (req, res) => {
 export const logReminder = async (req, res) => {
   try {
     const { id } = req.params;
-    
+
     // 1. Fetch current settings for template and signature
     const settings = await settingsService.getSettings();
     const template = settings.billing_reminder_template;
@@ -282,7 +284,7 @@ export const logReminder = async (req, res) => {
 
     // 2. Use the central reminders service to "send" (console log + prisma update)
     const results = await remindersService.sendReminders([id], { template, signature });
-    
+
     res.json({ success: true, data: results[0].history });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });
