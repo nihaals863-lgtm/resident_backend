@@ -26,7 +26,7 @@ export const getOverdueResidents = async () => {
 
 export const sendReminders = async (residentIds, { template, signature }) => {
   const now = new Date();
-  
+
   return await prisma.$transaction(async (tx) => {
     const results = [];
     for (const id of residentIds) {
@@ -44,7 +44,7 @@ export const sendReminders = async (residentIds, { template, signature }) => {
       const renderedBody = template
         .replaceAll('{Name}', residentRes.name)
         .replaceAll('{Amount}', `€${balance.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
-      
+
       const fullEmailMock = `${renderedBody}\n\n---\n${signature}`;
 
       // 3. Update Resident Status
@@ -67,7 +67,7 @@ export const sendReminders = async (residentIds, { template, signature }) => {
           // For now, we've matched the logic perfectly.
         }
       });
-      
+
       console.log(`[Email System] Sending to ${resident.email}:\n${fullEmailMock}\n`);
 
       results.push({ resident, history });

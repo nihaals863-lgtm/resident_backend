@@ -1,13 +1,15 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "main": "index.js",
+  "main": "src/server.js",
   "type": "module",
   "directories": {
     "doc": "doc"
   },
   "scripts": {
+    "start": "node src/server.js",
     "dev": "node --watch src/server.js",
+    "postinstall": "prisma generate",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "keywords": [],
