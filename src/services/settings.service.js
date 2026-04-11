@@ -10,14 +10,23 @@ export const getSettings = async () => {
 };
 
 export const updateSettings = async (settings) => {
-  const updates = Object.entries(settings).map(([key, value]) => 
-    prisma.systemConfig.upsert({
+  if (!settings || typeof settings !== 'object') {
+    throw new Error('Invalid settings object provided');
+  }
+
+  const entries = Object.entries(settings);
+  const results = [];
+
+  for (const [key, value] of entries) {
+    const result = await prisma.systemConfig.upsert({
       where: { key },
       update: { value: String(value) },
       create: { key, value: String(value) }
-    })
-  );
-  return await prisma.$transaction(updates);
+    });
+    results.push(result);
+  }
+
+  return results;
 };
 
 export const getIntegrations = async () => {
@@ -53,6 +62,19 @@ export const seedSystemConfig = async () => {
         { key: 'billing_reminder_template', value: 'Dear {Name},\n\nWe would like to remind you that your account currently has an outstanding balance of {Amount}.\n\nPlease ensure this is settled at your earliest convenience to avoid further action.\n\nThank you.' },
         { key: 'billing_signature', value: 'Best regards,\nBilling Department' }
       ]
+    });
+  }
+
+  // Seed Admin User
+  const userCount = await prisma.user.count();
+  if (userCount === 0) {
+    await prisma.user.create({
+      data: {
+        name: 'Admin',
+        email: 'admin@residence.com',
+        password: 'password123',
+        avatar: null
+      }
     });
   }
 };

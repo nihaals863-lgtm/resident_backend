@@ -32,8 +32,8 @@ export const uploadCSV = async (req, res) => {
 
 export const matchTransaction = async (req, res) => {
   try {
-    const { transactionId, residentId } = req.body;
-    const payment = await bankService.matchTransaction(transactionId, residentId);
+    const { transactionId, residentId, allocations } = req.body;
+    const payment = await bankService.matchTransaction(transactionId, residentId, allocations);
     res.json({ success: true, data: payment });
   } catch (error) {
     res.status(500).json({ success: false, error: error.message });

@@ -8,13 +8,15 @@ import dashboardRoutes from './routes/dashboard.routes.js';
 import remindersRoutes from './routes/reminders.routes.js';
 import reportsRoutes from './routes/reports.routes.js';
 import noteRoutes from './routes/note.routes.js';
+import settingsRoutes from './routes/settings.routes.js';
+import userRoutes from './routes/user.routes.js';
 
 import cors from 'cors';
 
 const app = express();
 
 app.use(cors());
-app.use(express.json());
+app.use(express.json({ limit: '50mb' })); // Increase limit for base64 images
 
 // Debug Logger to track all requests
 app.use((req, res, next) => {
@@ -32,5 +34,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/reminders", remindersRoutes);
 app.use("/api/reports", reportsRoutes);
 app.use("/api/notes", noteRoutes);
+app.use("/api/settings", settingsRoutes);
+app.use("/api/user", userRoutes);
 
 export default app;

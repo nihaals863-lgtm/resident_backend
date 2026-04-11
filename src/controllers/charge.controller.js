@@ -57,3 +57,32 @@ export const generateMonthlyCharges = async (req, res) => {
     res.status(500).json({ success: false, error: error.message });
   }
 };
+export const updateCharge = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const charge = await chargeService.updateCharge(id, req.body);
+    res.json({ success: true, data: charge });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const importCharges = async (req, res) => {
+  try {
+    const { residentId, charges } = req.body;
+    const result = await chargeService.importCharges(residentId, charges);
+    res.json(result);
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};
+
+export const deleteCharge = async (req, res) => {
+  try {
+    const { id } = req.params;
+    await chargeService.deleteCharge(id);
+    res.json({ success: true });
+  } catch (error) {
+    res.status(500).json({ success: false, error: error.message });
+  }
+};

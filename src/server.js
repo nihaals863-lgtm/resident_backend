@@ -9,18 +9,23 @@ import paymentRoutes from './routes/payment.routes.js';
 import bankRoutes from './routes/bank.routes.js';
 import dashboardRoutes from './routes/dashboard.routes.js';
 import reportsRoutes from './routes/reports.routes.js';
+import { seedSystemConfig } from './services/settings.service.js';
+import { seedAdminUser } from './services/userService.js';
 
 const PORT = process.env.PORT || 5000;
 
-app.use('/api/residents', residentRoutes);
-app.use('/api/charges', chargeRoutes);
-app.use('/api/payments', paymentRoutes);
-app.use('/api/houses', houseRoutes);
-app.use('/api/settings', settingsRoutes);
-app.use('/api/reminders', remindersRoutes);
-app.use('/api/bank', bankRoutes);
-app.use('/api/dashboard', dashboardRoutes);
-app.use('/api/reports', reportsRoutes);
+// Automate initial seeding
+const runSeeds = async () => {
+  try {
+    await seedSystemConfig();
+    await seedAdminUser();
+    console.log('Database seeding checked/completed.');
+  } catch (err) {
+    console.error('Seeding error:', err);
+  }
+};
+
+runSeeds();
 
 app.listen(PORT, () => {
   console.log(`Server is running on port ${PORT}`);

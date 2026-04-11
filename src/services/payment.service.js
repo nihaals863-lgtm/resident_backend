@@ -80,7 +80,7 @@ export const allocatePayment = async (paymentId, allocations) => {
 };
 
 export const recordPayment = async (data) => {
-  const { residentId, amount, date, method, note } = data;
+  const { residentId, amount, date, method, note, allocations: manualAllocations } = data;
 
   return await prisma.$transaction(async (tx) => {
     // 1. Create the payment record
@@ -94,36 +94,35 @@ export const recordPayment = async (data) => {
       }
     });
 
-    // 2. Find unpaid charges for this resident, ordered by month/date
-    const unpaidCharges = await tx.charge.findMany({
-      where: {
-        residentId,
-        status: { in: ['UNPAID', 'PARTIAL'] }
-      },
-      orderBy: {
-        month: 'asc' // Simplistic: Should probably be date-based
-      }
-    });
+    let totalAllocated = 0;
 
-    let remainingAmount = amount;
-    const allocations = [];
+    // 2. Process manual allocations if provided
+    if (manualAllocations && Array.isArray(manualAllocations)) {
+      for (const allocation of manualAllocations) {
+        const { chargeId, amount: allocAmount } = allocation;
+        const numAllocAmount = parseFloat(allocAmount);
 
-    for (const charge of unpaidCharges) {
-      if (remainingAmount <= 0) break;
+        if (numAllocAmount <= 0) continue;
 
-      const needed = charge.amount - charge.paidAmount;
-      const toAllocate = Math.min(remainingAmount, needed);
+        const charge = await tx.charge.findUnique({
+          where: { id: chargeId },
+        });
 
-      if (toAllocate > 0) {
+        if (!charge) {
+          throw new Error(`Charge not found: ${chargeId}`);
+        }
+
+        // Create allocation record
         await tx.paymentAllocation.create({
           data: {
             paymentId: payment.id,
             chargeId: charge.id,
-            amount: toAllocate
+            amount: numAllocAmount
           }
         });
 
-        const newPaidAmount = charge.paidAmount + toAllocate;
+        // Update charge status and paid amount
+        const newPaidAmount = charge.paidAmount + numAllocAmount;
         const newStatus = newPaidAmount >= charge.amount ? 'PAID' : 'PARTIAL';
 
         await tx.charge.update({
@@ -134,12 +133,16 @@ export const recordPayment = async (data) => {
           }
         });
 
-        remainingAmount -= toAllocate;
-        allocations.push({ chargeId: charge.id, amount: toAllocate });
+        totalAllocated += numAllocAmount;
       }
     }
 
-    // 3. If any amount remains, it goes to creditBalance
+    if (totalAllocated > amount) {
+      throw new Error('Total allocated amount exceeds the payment amount');
+    }
+
+    // 3. If any amount remains unallocated, add to resident's credit balance
+    const remainingAmount = amount - totalAllocated;
     if (remainingAmount > 0) {
       await tx.resident.update({
         where: { id: residentId },
@@ -151,7 +154,7 @@ export const recordPayment = async (data) => {
 
     return {
       payment,
-      allocated: amount - remainingAmount,
+      allocated: totalAllocated,
       toCredit: remainingAmount
     };
   });

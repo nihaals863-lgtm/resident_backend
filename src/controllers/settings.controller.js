@@ -12,10 +12,21 @@ export const getSettings = async (req, res) => {
 export const updateSettings = async (req, res) => {
   try {
     const { settings } = req.body;
+    
+    if (settings) {
+      console.log(`[DEBUG] Updating settings with keys:`, Object.keys(settings));
+      const payloadSize = JSON.stringify(settings).length;
+      console.log(`[DEBUG] Estimated settings payload size: ${(payloadSize / 1024).toFixed(2)} KB`);
+    } else {
+      console.warn('[DEBUG] updateSettings called with no settings in payload');
+    }
+
     await settingsService.updateSettings(settings);
     res.json({ success: true, message: 'Settings updated successfully' });
   } catch (error) {
-    res.status(500).json({ success: false, error: error.message });
+    console.error('[SETTINGS ERROR FULL STACK]:', error);
+    // Returning the actual error message to help debug 500 error
+    res.status(500).json({ success: false, error: `Server Error: ${error.message}` });
   }
 };
 

@@ -79,7 +79,7 @@ export const uploadTransactions = async (txs) => {
   return { success: true, importedCount, skippedCount, errorCount };
 };
 
-export const matchTransaction = async (transactionId, residentId) => {
+export const matchTransaction = async (transactionId, residentId, allocations = []) => {
   const transaction = await prisma.bankTransaction.findUnique({
     where: { id: transactionId }
   });
@@ -88,13 +88,14 @@ export const matchTransaction = async (transactionId, residentId) => {
   if (transaction.status === 'MATCHED') throw new Error('Transaction is already matched');
 
   return await prisma.$transaction(async (tx) => {
-    // 1. Record the payment
+    // 1. Record the payment with allocations
     const payment = await paymentService.recordPayment({
       residentId,
       amount: transaction.amount,
       date: transaction.date,
       method: 'Bank Transfer',
-      note: `Matched from bank: ${transaction.description}`
+      note: `Matched from bank: ${transaction.description}`,
+      allocations
     });
 
     // 2. Update transaction status and store paymentId link
