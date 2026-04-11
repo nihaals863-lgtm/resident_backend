@@ -15,6 +15,10 @@ model House {
   createdAt DateTime   @default(now())
   residents Resident[]
 
+<<<<<<< HEAD
+=======
+  createdAt DateTime   @default(now())
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   @@map("house")
 }
 
@@ -41,7 +45,18 @@ model Resident {
   reminders        Reminder[]
   house            House              @relation(fields: [houseId], references: [id])
 
+<<<<<<< HEAD
   @@index([houseId], map: "resident_houseId_fkey")
+=======
+  reminders     Reminder[]
+  chargeDefs    ChargeDefinition[]
+  charges       Charge[]
+  payments      Payment[]
+  aliases       Alias[]
+  notes         Note[]
+  createdAt     DateTime           @default(now())
+
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   @@map("resident")
 }
 
@@ -52,9 +67,13 @@ model Note {
   residentId String
   createdAt  DateTime @default(now())
   updatedAt  DateTime @updatedAt
+<<<<<<< HEAD
   resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
 
   @@index([residentId], map: "note_residentId_fkey")
+=======
+
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   @@map("note")
 }
 
@@ -68,7 +87,16 @@ model ChargeDefinition {
   createdAt   DateTime @default(now())
   resident    Resident @relation(fields: [residentId], references: [id])
 
+<<<<<<< HEAD
   @@index([residentId], map: "chargedefinition_residentId_fkey")
+=======
+  type       String
+  amount     Float
+  startDate  DateTime
+
+  createdAt  DateTime @default(now())
+
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   @@map("chargedefinition")
 }
 
@@ -90,7 +118,12 @@ model Charge {
   resident    Resident            @relation(fields: [residentId], references: [id])
   allocations PaymentAllocation[]
 
+<<<<<<< HEAD
   @@index([residentId], map: "charge_residentId_fkey")
+=======
+  createdAt  DateTime            @default(now())
+
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   @@map("charge")
 }
 
@@ -105,7 +138,12 @@ model Payment {
   resident    Resident            @relation(fields: [residentId], references: [id])
   allocations PaymentAllocation[]
 
+<<<<<<< HEAD
   @@index([residentId], map: "payment_residentId_fkey")
+=======
+  createdAt  DateTime            @default(now())
+
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   @@map("payment")
 }
 
@@ -115,11 +153,15 @@ model PaymentAllocation {
   chargeId  String
   amount    Float
   createdAt DateTime @default(now())
+<<<<<<< HEAD
   charge    Charge   @relation(fields: [chargeId], references: [id], onDelete: Cascade)
   payment   Payment  @relation(fields: [paymentId], references: [id], onDelete: Cascade)
 
   @@index([chargeId], map: "paymentallocation_chargeId_fkey")
   @@index([paymentId], map: "paymentallocation_paymentId_fkey")
+=======
+
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   @@map("paymentallocation")
 }
 
@@ -131,7 +173,10 @@ model BankTransaction {
   reference   String?
   status      String   @default("UNMATCHED")
   createdAt   DateTime @default(now())
+<<<<<<< HEAD
   paymentId   String?  @unique(map: "BankTransaction_paymentId_key")
+=======
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
 
   @@map("banktransaction")
 }
@@ -143,7 +188,12 @@ model Alias {
   createdAt   DateTime @default(now())
   resident    Resident @relation(fields: [residentId], references: [id])
 
+<<<<<<< HEAD
   @@index([residentId], map: "alias_residentId_fkey")
+=======
+  createdAt   DateTime @default(now())
+
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   @@map("alias")
 }
 
@@ -154,10 +204,15 @@ model Reminder {
   date       DateTime @default(now())
   status     String?  @default("SENT")
   createdAt  DateTime @default(now())
+<<<<<<< HEAD
   resident   Resident @relation(fields: [residentId], references: [id], onDelete: Cascade)
 
   @@index([residentId], map: "reminder_residentId_fkey")
   @@map("reminder")
+=======
+
+@@map("reminder")
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
 }
 
 model SystemConfig {
@@ -168,6 +223,7 @@ model SystemConfig {
 
   @@map("systemconfig")
 }
+
 
 model Integration {
   id          String   @id @default(uuid())
@@ -184,9 +240,16 @@ model Integration {
 model User {
   id        String   @id @default(uuid())
   name      String
+<<<<<<< HEAD
   email     String   @unique(map: "User_email_key")
   password  String
   avatar    String?  @db.LongText
+=======
+  email     String   @unique
+  password  String
+  avatar    String?  @db.LongText
+
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 

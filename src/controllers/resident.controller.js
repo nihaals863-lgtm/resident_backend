@@ -24,7 +24,11 @@ export const getAllResidents = async (req, res) => {
 
 export const createResident = async (req, res) => {
   try {
+<<<<<<< HEAD
     const { name, email, debtorNumber, address, billingAddress, serviceRecipient, serviceRecipientAddress, houseId, startDate, creditBalance, monthlyCharge } = req.body;
+=======
+    const { name, email, debtorNumber, address, billingAddress, houseId, startDate, creditBalance, monthlyCharge } = req.body;
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
 
     // Create resident and potentially initial charge definition in a transaction
     const resident = await prisma.$transaction(async (tx) => {
@@ -120,7 +124,11 @@ export const getResidentById = async (req, res) => {
 export const updateResident = async (req, res) => {
   try {
     const { id } = req.params;
+<<<<<<< HEAD
     const { name, email, debtorNumber, address, billingAddress, serviceRecipient, serviceRecipientAddress, houseId, startDate, creditBalance, charges } = req.body;
+=======
+    const { name, email, debtorNumber, address, billingAddress, houseId, startDate, creditBalance, charges } = req.body;
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
 
     const resident = await prisma.$transaction(async (tx) => {
       // 1. Update basic info

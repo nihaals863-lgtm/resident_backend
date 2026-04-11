@@ -27,6 +27,7 @@ export const getOverdueResidents = async () => {
 export const sendReminders = async (residentIds, { template, signature }) => {
   const now = new Date();
 
+<<<<<<< HEAD
   // Fetch settings once at the start
   const settingsEntries = await prisma.systemConfig.findMany();
   const config = {};
@@ -37,6 +38,8 @@ export const sendReminders = async (residentIds, { template, signature }) => {
   const emailjsPublicKey = config.emailjs_public_key || 'I3fOfZW70y32ceu5q';
   const logo = config.billing_logo || '';
 
+=======
+>>>>>>> b48dc082e40dd9b1b7d7ec9df2470b0d2555a3eb
   return await prisma.$transaction(async (tx) => {
     const results = [];
     for (const id of residentIds) {
